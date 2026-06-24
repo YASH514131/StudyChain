@@ -1,0 +1,8 @@
+{
+  "challengeId": 1,
+  "runner": "typescript",
+  "entrypoint": "./exploit.ts",
+  "env": {
+    "SOLANA_RPC_URL": "https://api.devnet.solana.com"
+  }
+}

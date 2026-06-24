@@ -1,0 +1,11 @@
+node_modules/
+target/
+**/node_modules/
+.env
+.env.local
+dist/
+build/
+.DS_Store
+pkg/
+anchor/target/
+.studychain_attacker_key.json

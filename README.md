@@ -24,15 +24,16 @@ StudyChain is an on-chain skill verification protocol where developers and CS st
 10. [What Lives in a Developer's Wallet](#what-lives-in-a-developers-wallet)
 11. [The Skill Track System](#the-skill-track-system)
 12. [On-Chain Profile](#on-chain-profile)
-13. [Soulbound Credential Architecture](#soulbound-credential-architecture)
-14. [Technical Architecture](#technical-architecture)
-15. [Security and Anti-Gaming](#security-and-anti-gaming)
-16. [Revenue Model](#revenue-model)
-17. [Network Effects and Flywheel](#network-effects-and-flywheel)
-18. [3-Month Launch Roadmap](#3-month-launch-roadmap)
-19. [Competitive Landscape](#competitive-landscape)
-20. [Risks and Mitigations](#risks-and-mitigations)
-21. [Traction](#traction)
+13. [NAS — Network Ability Score](#nas--network-ability-score)
+14. [Soulbound Credential Architecture](#soulbound-credential-architecture)
+15. [Technical Architecture](#technical-architecture)
+16. [Security and Anti-Gaming](#security-and-anti-gaming)
+17. [Revenue Model](#revenue-model)
+18. [Network Effects and Flywheel](#network-effects-and-flywheel)
+19. [3-Month Launch Roadmap](#3-month-launch-roadmap)
+20. [Competitive Landscape](#competitive-landscape)
+21. [Risks and Mitigations](#risks-and-mitigations)
+22. [Traction](#traction)
 
 ---
 
@@ -375,6 +376,113 @@ Profile displays: all earned credentials with issuing organizations, skill domai
 
 ---
 
+## NAS — Network Ability Score
+
+Credentials tell you what a developer has completed. NAS tells you how well they performed doing it.
+
+NAS is StudyChain's Elo-style skill rating — a single public number on every developer's profile that reflects challenge difficulty, speed of completion, and attempt efficiency. It is not binary like a credential. It is continuous, always updating, and impossible to fake because every data point feeding it is verified on-chain.
+
+---
+
+### What NAS Measures
+
+Three factors determine how many NAS points a developer earns on each challenge:
+
+**1. Challenge Difficulty — Base Points**
+
+| Challenge Level | Base Points |
+|---|---|
+| L1 — Beginner | 100 |
+| L2 — Intermediate | 250 |
+| L3 — Advanced | 500 |
+| Master Track Completion | 1,000 |
+
+**2. Speed Multiplier**
+Measured against the average completion time across all developers who passed the same challenge.
+
+| Completion Speed | Multiplier |
+|---|---|
+| Top 10% fastest | 2.0× |
+| Top 25% fastest | 1.5× |
+| Top 50% fastest | 1.2× |
+| Below median | 1.0× |
+
+**3. Attempt Multiplier**
+Fewer attempts signals deeper first-pass understanding — not trial and error.
+
+| Attempts Taken | Multiplier |
+|---|---|
+| 1st attempt | 1.5× |
+| 2nd attempt | 1.2× |
+| 3rd attempt | 1.0× |
+
+---
+
+### NAS Formula
+
+```
+NAS Points = Base Points × Speed Multiplier × Attempt Multiplier
+```
+
+**Example — Elite Performance:**
+Developer exploits the L3 CPI Reentrancy challenge on first attempt, finishing in the top 10% of all completion times:
+```
+500 × 2.0 × 1.5 = 1,500 NAS points
+```
+
+**Example — Standard Performance:**
+Developer completes an L1 challenge on their third attempt, below median speed:
+```
+100 × 1.0 × 1.0 = 100 NAS points
+```
+
+NAS accumulates across every challenge completed. The score reflects the full history of a developer's verified performance.
+
+---
+
+### NAS Tiers
+
+| NAS Score | Tier | What It Signals |
+|---|---|---|
+| 0 – 299 | Initiate | Just getting started |
+| 300 – 799 | Builder | Solid fundamentals proven |
+| 800 – 1,999 | Practitioner | Real working knowledge across domains |
+| 2,000 – 4,999 | Expert | Hire-ready, grant-ready signal |
+| 5,000 – 9,999 | Architect | Senior-level depth and breadth |
+| 10,000+ | Sovereign | Top 1% verified technical talent |
+
+---
+
+### NAS on the Developer Profile
+
+NAS score and tier are fully public on every developer's profile. Organizations browsing the verified talent pool can sort by NAS to surface the highest performers instantly — no additional screening required.
+
+```
+studychain.xyz/profile/0x...wallet...
+
+NAS Score: 3,840 — Expert
+───────────────────────────────────
+Rank: Top 4% globally
+Credentials: 7 earned across 3 organizations
+Last active: 3 days ago
+```
+
+---
+
+### Why NAS Creates Daily Active Usage
+
+Credentials are earned once and held forever. NAS keeps moving. A developer who earns their L3 security credential still has reason to return — every new challenge completed improves their score, moves them up the leaderboard, and makes them more visible to protocols browsing the talent pool.
+
+The public leaderboard ranked by NAS is also a growth mechanic. "Just hit Architect tier on StudyChain" is a post developers share on X. That is organic distribution the platform does not pay for.
+
+---
+
+### NAS Is Off-Chain Computed, On-Chain Anchored
+
+NAS is computed by StudyChain's backend using verified on-chain data — challenge completion transactions, timestamps, and attempt counts recorded on Solana. The score itself is stored off-chain for fast querying, but the underlying data feeding it is always on-chain and independently verifiable. Periodic NAS snapshots are anchored on-chain so the score history cannot be manipulated retroactively.
+
+---
+
 ## Soulbound Credential Architecture
 
 ### Token Standard
@@ -440,14 +548,324 @@ Fail → Structured feedback returned
 | Smart Contracts | Anchor (Rust) | Per-organization credential programs, Soulbound minting, verifier logic |
 | NFT Standard | Metaplex pNFT | Soulbound enforcement, non-transferability |
 | Credential Metadata | Arweave | Permanent, decentralised metadata storage |
-| Backend | Supabase + Edge Functions | Verification relayer, org management, challenge builder |
+| Backend | Node.js + Express | Verification engine, session management, deploy orchestration |
+| Database | MongoDB Atlas | Sessions, developer profiles, credentials, NAS scores |
 | RPC Provider | Helius | Reliable Solana RPC with webhook support |
-| Content Delivery | Cloudflare Workers | Challenge delivery, low-latency global edge |
-| Frontend | React (Web) + Flutter (Mobile) | Developer dashboard and organization portal |
-| Wallet — Crypto Users | Phantom | Native Solana wallet integration |
-| Wallet — Non-Crypto Users | Privy | Embedded wallet, email / Google signup |
+| Frontend | React (Web) — already built | Developer dashboard and organization portal |
+| CLI Tool | studychain-cli (npm) | Bridges browser to developer's local terminal for exploit execution |
+| Wallet | Phantom | Native Solana wallet connection |
+| Auth | JWT (wallet signature verified on backend) | Session management |
+| Hosting — Frontend | Vercel | Free, auto-deploys from GitHub |
+| Hosting — Backend | DigitalOcean Droplet (GitHub Student Pack $200) | Node.js server, .so file storage |
 | EVM Verification | Alchemy | Sepolia testnet state verification for EVM challenges |
-| Organization API | REST + Webhooks | Level 3 white label integration |
+
+---
+
+### Complete Project Folder Structure
+
+```
+studychain/
+│
+├── web/                          ← FRONTEND (already built by you)
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── index.tsx         ← Landing page
+│   │   │   ├── dashboard.tsx     ← Developer dashboard
+│   │   │   ├── challenge/
+│   │   │   │   └── [id].tsx      ← Challenge page (Monaco Editor)
+│   │   │   ├── profile/
+│   │   │   │   └── [wallet].tsx  ← Public developer profile
+│   │   │   └── org/
+│   │   │       └── dashboard.tsx ← Organization dashboard
+│   │   ├── components/
+│   │   │   ├── WalletConnect.tsx
+│   │   │   ├── MonacoEditor.tsx
+│   │   │   ├── NASScore.tsx
+│   │   │   ├── CredentialCard.tsx
+│   │   │   └── CLIStatus.tsx     ← Shows if studychain-cli is connected
+│   │   └── lib/
+│   │       ├── api.ts            ← Calls to backend API
+│   │       └── wallet.ts         ← Phantom wallet utils
+│   ├── package.json
+│   └── .env.local                ← NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
+│
+├── backend/                      ← BACKEND (Node.js — what we build next)
+│   ├── src/
+│   │   ├── index.ts              ← Express server entry point
+│   │   ├── routes/
+│   │   │   ├── auth.ts           ← POST /api/auth/login (wallet signature → JWT)
+│   │   │   ├── challenges.ts     ← GET /api/challenges, GET /api/challenges/:id
+│   │   │   ├── sessions.ts       ← POST /api/sessions/start (deploy .so instance)
+│   │   │   ├── verify.ts         ← POST /api/verify (check exploit TX)
+│   │   │   ├── credentials.ts    ← GET /api/credentials/:wallet
+│   │   │   └── organizations.ts  ← POST /api/orgs/register
+│   │   ├── services/
+│   │   │   ├── deploy.service.ts     ← Deploys .so to devnet via Solana CLI
+│   │   │   ├── verify.service.ts     ← 3-step TX verification logic
+│   │   │   ├── mint.service.ts       ← Triggers Anchor program to mint NFT
+│   │   │   ├── arweave.service.ts    ← Uploads metadata to Arweave
+│   │   │   ├── nas.service.ts        ← Calculates and updates NAS score
+│   │   │   └── jwt.service.ts        ← Issues and validates JWT tokens
+│   │   ├── middleware/
+│   │   │   ├── auth.middleware.ts    ← Validates JWT on protected routes
+│   │   │   └── ratelimit.middleware.ts ← Max 3 attempts per challenge per 24hr
+│   │   ├── models/
+│   │   │   ├── Developer.ts          ← MongoDB schema
+│   │   │   ├── Session.ts            ← MongoDB schema
+│   │   │   ├── Credential.ts         ← MongoDB schema
+│   │   │   ├── Challenge.ts          ← MongoDB schema
+│   │   │   └── Organization.ts       ← MongoDB schema
+│   │   └── utils/
+│   │       ├── solana.ts             ← Helius RPC connection
+│   │       └── constants.ts          ← NAS multipliers, tier thresholds
+│   ├── contracts/                ← Pre-compiled vulnerable contracts (.so files)
+│   │   ├── vulnerable_escrow_l1.so
+│   │   ├── vulnerable_vault_l2.so
+│   │   └── vulnerable_lending_l3.so
+│   ├── keys/
+│   │   └── .gitignore            ← NEVER commit keypairs to GitHub
+│   ├── package.json
+│   └── .env                      ← All secrets (never committed)
+│
+├── programs/                     ← ANCHOR SMART CONTRACTS
+│   └── studychain/
+│       └── src/
+│           └── lib.rs            ← Main Anchor program (already written)
+│
+├── cli/                          ← STUDYCHAIN CLI (npm package)
+│   ├── src/
+│   │   ├── index.ts              ← CLI entry point
+│   │   └── server.ts             ← Local HTTP server on port 39999
+│   └── package.json
+│
+├── Anchor.toml                   ← Anchor config (already written)
+└── README.md                     ← This file
+```
+
+---
+
+### Environment Variables
+
+**backend/.env** (never commit to GitHub)
+```
+# Solana
+HELIUS_RPC_URL=https://devnet.helius-rpc.com/?api-key=YOUR_KEY
+PLATFORM_KEYPAIR=[your funded devnet keypair as JSON array]
+
+# MongoDB
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/studychain
+
+# JWT
+JWT_SECRET=your_long_random_secret_string_here
+
+# Arweave
+ARWEAVE_KEY=[your arweave wallet key]
+
+# Server
+PORT=4000
+```
+
+**web/.env.local**
+```
+# Local development
+NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
+
+# Production (swap this when deploying)
+# NEXT_PUBLIC_BACKEND_URL=https://your-digitalocean-ip:4000
+```
+
+---
+
+### Local Development Setup (Run Everything Locally First)
+
+Follow these steps exactly to run StudyChain on your PC before any deployment.
+
+**Prerequisites**
+```bash
+# Make sure you have these installed
+node --version        # v18+
+solana --version      # 1.18+
+anchor --version      # 0.29+
+mongod --version      # or use MongoDB Atlas free tier
+```
+
+**Step 1 — Clone and install**
+```bash
+git clone https://github.com/YASH514131/studychain
+cd studychain
+
+# Install backend dependencies
+cd backend && npm install
+
+# Install frontend dependencies  
+cd ../web && npm install
+
+# Install CLI dependencies
+cd ../cli && npm install
+```
+
+**Step 2 — Set up environment variables**
+```bash
+# Copy example env files
+cp backend/.env.example backend/.env
+cp web/.env.example web/.env.local
+
+# Fill in your values in both files
+```
+
+**Step 3 — Set up your platform devnet wallet**
+```bash
+# Generate a new keypair for the platform backend
+solana-keygen new --outfile backend/keys/platform-devnet.json
+
+# Airdrop free SOL on devnet
+solana airdrop 5 $(solana-keygen pubkey backend/keys/platform-devnet.json) --url devnet
+
+# Add the keypair to backend/.env as JSON array
+cat backend/keys/platform-devnet.json
+# Copy the output into PLATFORM_KEYPAIR in .env
+```
+
+**Step 4 — Build and deploy Anchor program to devnet**
+```bash
+cd programs
+
+# Build the program
+anchor build
+
+# Get your program ID
+anchor keys list
+
+# Replace STUDYCHAIN_PROGRAM_ID_REPLACE_AFTER_DEPLOY
+# in Anchor.toml and lib.rs with your actual program ID
+
+# Deploy to devnet
+anchor deploy --provider.cluster devnet
+```
+
+**Step 5 — Run backend locally**
+```bash
+cd backend
+npm run dev
+# Backend running at http://localhost:4000
+```
+
+**Step 6 — Run frontend locally**
+```bash
+cd web
+npm run dev
+# Frontend running at http://localhost:3000
+```
+
+**Step 7 — Run StudyChain CLI locally**
+```bash
+cd cli
+npm run dev
+# CLI server running at http://localhost:39999
+# Browser will detect this automatically
+```
+
+**Step 8 — Test the full flow locally**
+```
+Open http://localhost:3000
+Connect Phantom wallet (switch to devnet in Phantom)
+Navigate to a challenge
+CLI should show: ✅ Connected
+Deploy your instance → get program ID
+Write exploit → Run → TX signature returned
+Submit → Backend verifies → NFT minted
+```
+
+---
+
+### Deployment (After Local Testing Is Successful)
+
+Only deploy when everything works perfectly locally.
+
+**Frontend → Vercel**
+```bash
+# Push web/ folder to GitHub
+# Connect repo to Vercel
+# Set environment variable:
+# NEXT_PUBLIC_BACKEND_URL=https://your-digitalocean-ip:4000
+# Vercel auto-deploys on every GitHub push
+```
+
+**Backend → DigitalOcean Droplet**
+```bash
+# Create $4/month Droplet on DigitalOcean
+# (covered by GitHub Student Pack $200 credit)
+# Choose: Ubuntu 22.04, Node.js pre-installed
+
+# SSH into your droplet
+ssh root@your-droplet-ip
+
+# Clone your repo
+git clone https://github.com/YASH514131/studychain
+cd studychain/backend
+
+# Install dependencies
+npm install
+
+# Set up environment variables on the server
+nano .env
+# Paste all your environment variables
+
+# Install PM2 to keep backend running forever
+npm install -g pm2
+pm2 start npm --name "studychain-backend" -- start
+pm2 save
+pm2 startup
+
+# Backend now running at http://your-droplet-ip:4000
+```
+
+**CLI → npm registry**
+```bash
+cd cli
+npm publish
+# Developers install with:
+# npm install -g studychain-cli
+```
+
+---
+
+### TX Verification Flow (3-Step Process)
+
+After developer runs exploit locally via CLI and submits TX signature:
+
+```
+Developer submits TX signature to backend
+        ↓
+CHECK 1 — TX exists on devnet
+Backend asks Helius RPC:
+"Did this transaction happen?"
+Helius returns full TX details
+If TX not found or failed → reject
+        ↓
+CHECK 2 — Correct wallet signed it
+TX signer must match session wallet in MongoDB
+If mismatch → reject
+"You cannot submit someone else's transaction"
+        ↓
+CHECK 3 — Correct program exploited successfully
+TX must have interacted with THIS session's program ID
+On-chain state checked: was contract drained/exploited?
+If wrong program or exploit failed → reject
+        ↓
+ALL 3 PASS →
+  Upload metadata to Arweave
+  Trigger Anchor program → mint Soulbound NFT
+  Update NAS score in MongoDB + on-chain
+  Close devnet program instance (reclaim SOL)
+  Mark session as passed in MongoDB
+  Return success to frontend
+        ↓
+Browser shows:
+"🎉 Exploit verified! Credential minted to your wallet."
+```
+
+---
 
 ### Per-Organization Program Deployment
 

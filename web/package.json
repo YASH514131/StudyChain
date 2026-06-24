@@ -1,0 +1,35 @@
+{
+  "name": "studychain-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@solana/wallet-adapter-base": "*",
+    "@solana/wallet-adapter-react": "*",
+    "@solana/wallet-adapter-react-ui": "*",
+    "@solana/wallet-adapter-wallets": "*",
+    "@solana/web3.js": "^1.82.0",
+    "bs58": "^6.0.0",
+    "buffer": "^6.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.18.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.1",
+    "@types/react": "^18.2.25",
+    "@types/react-dom": "^18.2.8",
+    "@vitejs/plugin-react": "^4.0.0",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^4.3.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.3.9",
+    "vite-plugin-node-polyfills": "^0.28.0"
+  }
+}
